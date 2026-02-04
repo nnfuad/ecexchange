@@ -1,0 +1,41 @@
+:root {
+  --bg-dark: #121212;
+  --bg-light: #181818;
+  --accent: #1DB954;
+  --text-main: #ffffff;
+  --text-muted: #b3b3b3;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+}
+
+a {
+  color: var(--text-main);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+button {
+  background-color: var(--accent);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 20px;
+  color: black;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button:hover {
+  opacity: 0.9;
+}
