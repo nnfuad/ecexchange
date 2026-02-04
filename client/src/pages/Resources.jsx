@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
-import { syllabus } from "../data/syllabus";
 import { useState } from "react";
+import { syllabus } from "../data/syllabus";
 import UploadModal from "../components/UploadModal";
 
 /* TEMP MOCK FILES (READ ONLY) */
@@ -12,15 +12,34 @@ const mockFiles = [
 
 export default function Resources() {
   const { semesterId, courseCode } = useParams();
+  const token = localStorage.getItem("token");
+  const [showUpload, setShowUpload] = useState(false);
 
   /* ===============================
      SEMESTER VIEW
   =============================== */
   if (!semesterId) {
     return (
-      <div style={{ padding: "40px 60px" }}>
-        <h1 style={{ marginBottom: "30px" }}>Resources</h1>
+      <div style={{ padding: "40px 60px", width: "100%" }}>
+        {/* HEADER */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "30px"
+          }}
+        >
+          <h1>Resources</h1>
 
+          {token && (
+            <button onClick={() => setShowUpload(true)}>
+              Upload Resource
+            </button>
+          )}
+        </div>
+
+        {/* SEMESTER GRID */}
         <div
           style={{
             display: "grid",
@@ -38,13 +57,19 @@ export default function Resources() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontWeight: "600"
+                fontWeight: "600",
+                fontSize: "16px",
+                textAlign: "center"
               }}
             >
               {value.title}
             </Link>
           ))}
         </div>
+
+        {showUpload && (
+          <UploadModal onClose={() => setShowUpload(false)} />
+        )}
       </div>
     );
   }
@@ -59,13 +84,30 @@ export default function Resources() {
   =============================== */
   if (!courseCode) {
     return (
-      <div style={{ padding: "40px 60px" }}>
-        <Link to="/resources" style={{ color: "#1DB954" }}>
-          ← Back to semesters
-        </Link>
+      <div style={{ padding: "40px 60px", width: "100%" }}>
+        {/* HEADER */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px"
+          }}
+        >
+          <Link to="/resources" style={{ color: "#1DB954" }}>
+            ← Back to semesters
+          </Link>
 
-        <h1 style={{ margin: "20px 0 30px" }}>{semester.title}</h1>
+          {token && (
+            <button onClick={() => setShowUpload(true)}>
+              Upload Resource
+            </button>
+          )}
+        </div>
 
+        <h1 style={{ marginBottom: "30px" }}>{semester.title}</h1>
+
+        {/* COURSE GRID */}
         <div
           style={{
             display: "grid",
@@ -78,7 +120,7 @@ export default function Resources() {
 
             return (
               <Link
-                key={course.code}
+                key={course.code + course.title}
                 to={`/resources/${semesterId}/${safeCode}`}
                 className="card"
                 style={{
@@ -107,6 +149,10 @@ export default function Resources() {
             );
           })}
         </div>
+
+        {showUpload && (
+          <UploadModal onClose={() => setShowUpload(false)} />
+        )}
       </div>
     );
   }
@@ -124,15 +170,31 @@ export default function Resources() {
   }
 
   return (
-    <div style={{ padding: "40px 60px" }}>
-      <Link
-        to={`/resources/${semesterId}`}
-        style={{ color: "#1DB954" }}
+    <div style={{ padding: "40px 60px", width: "100%" }}>
+      {/* HEADER */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "16px"
+        }}
       >
-        ← Back to courses
-      </Link>
+        <Link
+          to={`/resources/${semesterId}`}
+          style={{ color: "#1DB954" }}
+        >
+          ← Back to courses
+        </Link>
 
-      <h1 style={{ margin: "20px 0 10px" }}>
+        {token && (
+          <button onClick={() => setShowUpload(true)}>
+            Upload Resource
+          </button>
+        )}
+      </div>
+
+      <h1 style={{ marginBottom: "6px" }}>
         {course.code}: {course.title}
       </h1>
 
@@ -140,6 +202,7 @@ export default function Resources() {
         {course.credits} credits • Read-only resources
       </p>
 
+      {/* FILE LIST */}
       <div className="card">
         {mockFiles.map((file, i) => (
           <div
@@ -174,8 +237,12 @@ export default function Resources() {
           color: "#b3b3b3"
         }}
       >
-        Uploading is restricted to logged-in users.
+        Files are read-only. Uploads are available to logged-in users only.
       </p>
+
+      {showUpload && (
+        <UploadModal onClose={() => setShowUpload(false)} />
+      )}
     </div>
   );
 }
