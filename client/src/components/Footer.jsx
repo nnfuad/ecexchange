@@ -14,7 +14,7 @@ export default function Footer() {
         © {new Date().getFullYear()} eceXchange
       </p>
       <p style={{ margin: "6px 0", fontSize: "13px" }}>
-        Built by <a href = "https://www.linkedin.com/in/nnfuad01/">Fuad</a>, for <a>ECE</a> • Academic use only
+        Built by <a href = "https://www.linkedin.com/in/nnfuad01/" target="_blank">Fuad</a>, for <a href="https://www.ece.ruet.ac.bd/" target="_blank">ECE</a> • Academic use only
       </p>
     </footer>
   );

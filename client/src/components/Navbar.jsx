@@ -32,15 +32,9 @@ export default function Navbar() {
     >
       {/* LOGO AREA */}
       <div style={{ display: "flex", alignItems: "center", gap: "20px", paddingLeft: "35%" }}>
-        {/* 
-          👉 PLACE YOUR LOGO HERE:
-          1. Put logo image in: src/assets/logo.png
-          2. Replace text below with:
-             <img src="/src/assets/logo.png" height="36" />
-        */}
-        <strong style={{ color: "#1DB954", fontSize: "20px" }}>
-          eceXchange
-        </strong>
+        
+         
+             <Link to="/"><img src="/src/assets/logo.gif" height="85" width="200"/></Link>
 
         <span style={{ color: "#b3b3b3", fontSize: "14px" }}>
           Learn • Share • Grow

@@ -1,261 +1,193 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export default function Auth() {
-  const navigate = useNavigate();
-
-  // Modes:
-  // login | signup | signup-otp | forgot | otp
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState("login"); // login | signup
+  const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
     roll: "",
     email: "",
-    password: "",
-    otp: ""
+    password: ""
   });
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/resources");
-    }
-  }, []);
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // =====================
-  // LOGIN
-  // =====================
-  const handleLogin = async () => {
-    try {
-      const res = await axios.post(
-        "http://localhost:5050/api/auth/login",
-        {
-          email: form.email,
-          password: form.password
-        }
-      );
-      localStorage.setItem("token", res.data.token);
-      navigate("/resources");
-    } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
-    }
-  };
+const handleSubmit = async e => {
+  e.preventDefault();
 
-  // =====================
-  // SIGNUP → SEND OTP
-  // =====================
-  const handleSignupRequest = async () => {
-    try {
-      await axios.post(
-        "http://localhost:5050/api/auth/signup-request",
-        {
-          name: form.name,
-          roll: form.roll,
-          email: form.email,
-          password: form.password
-        }
-      );
-      alert("Signup OTP sent to your email");
-      setMode("signup-otp");
-    } catch (err) {
-      alert(err.response?.data?.message || "Signup failed");
-    }
-  };
+  try {
+    const url =
+      mode === "login"
+        ? "http://localhost:5050/api/auth/login"
+        : "http://localhost:5050/api/auth/signup";
 
-  // =====================
-  // SIGNUP → VERIFY OTP
-  // =====================
-  const handleSignupVerify = async () => {
-    try {
-      await axios.post(
-        "http://localhost:5050/api/auth/signup-verify",
-        {
-          email: form.email,
-          otp: form.otp
-        }
-      );
-      alert("Signup successful. Please login.");
-      setMode("login");
-    } catch (err) {
-      alert(err.response?.data?.message || "OTP verification failed");
-    }
-  };
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(form)
+    });
 
-  // =====================
-  // FORGOT PASSWORD → SEND OTP
-  // =====================
-  const handleForgotPassword = async () => {
-    try {
-      await axios.post(
-        "http://localhost:5050/api/auth/forgot-password",
-        { email: form.email }
-      );
-      alert("OTP sent to your email");
-      setMode("otp");
-    } catch {
-      alert("Failed to send OTP");
-    }
-  };
+    const data = await res.json();
 
-  // =====================
-  // RESET PASSWORD → VERIFY OTP
-  // =====================
-  const handleResetPassword = async () => {
-    try {
-      await axios.post(
-        "http://localhost:5050/api/auth/reset-password",
-        {
-          email: form.email,
-          otp: form.otp,
-          password: form.password
-        }
-      );
-      alert("Password reset successful");
-      setMode("login");
-    } catch (err) {
-      alert(err.response?.data?.message || "Reset failed");
+    if (!res.ok) {
+      alert(data.message || "Authentication failed");
+      return;
     }
-  };
+
+    // SAVE TOKEN
+    localStorage.setItem("token", data.token);
+
+    // REDIRECT
+    window.location.href = "/";
+  } catch (err) {
+    alert("Server error");
+  }
+};
 
   return (
-    <div>
-      <h1>
-        {mode === "login" && "Login"}
-        {mode === "signup" && "Signup"}
-        {mode === "signup-otp" && "Verify Signup OTP"}
-        {mode === "forgot" && "Forgot Password"}
-        {mode === "otp" && "Reset Password"}
-      </h1>
+    <div style={pageStyle}>
+      {/* GLASS CARD */}
+      <div style={cardStyle}>
+        {/* HEADER */}
+        <h1 style={{ marginBottom: "6px" }}>
+          {mode === "login" ? "Welcome Back" : "Create Account"}
+        </h1>
 
-      {/* SIGNUP FIELDS */}
-      {mode === "signup" && (
-        <>
-          <input
-            name="name"
-            placeholder="Name"
-            onChange={handleChange}
-          />
-          <br />
-          <input
-            name="roll"
-            placeholder="Roll"
-            onChange={handleChange}
-          />
-          <br />
-        </>
-      )}
+        <p style={subText}>
+          {mode === "login"
+            ? "Login to access ECE resources"
+            : "Join ECE’s resource sharing platform"}
+        </p>
 
-      {/* EMAIL */}
-      {(mode === "login" ||
-        mode === "signup" ||
-        mode === "forgot" ||
-        mode === "otp" ||
-        mode === "signup-otp") && (
-        <>
+        {/* FORM */}
+        <form onSubmit={handleSubmit}>
+          {mode === "signup" && (
+            <>
+              <input
+                name="name"
+                placeholder="Full Name"
+                onChange={handleChange}
+                required
+              />
+
+              <input
+                name="roll"
+                placeholder="Roll Number"
+                onChange={handleChange}
+                required
+              />
+            </>
+          )}
+
           <input
             name="email"
-            placeholder="Email"
+            type="email"
+            placeholder="Email Address"
             onChange={handleChange}
+            required
           />
-          <br />
-        </>
-      )}
 
-      {/* PASSWORD */}
-      {(mode === "login" ||
-        mode === "signup" ||
-        mode === "otp") && (
-        <>
-          <input
-            type="password"
-            name="password"
-            placeholder={
-              mode === "otp" ? "New Password" : "Password"
-            }
-            onChange={handleChange}
-          />
-          <br />
-        </>
-      )}
+          {/* PASSWORD WITH TOGGLE */}
+          <div style={{ position: "relative" }}>
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              onChange={handleChange}
+              required
+            />
 
-      {/* OTP INPUT */}
-      {(mode === "otp" || mode === "signup-otp") && (
-        <>
-          <input
-            name="otp"
-            placeholder="Enter OTP"
-            onChange={handleChange}
-          />
-          <br />
-        </>
-      )}
+            <span
+              onClick={() => setShowPassword(!showPassword)}
+              style={eyeStyle}
+              title={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </span>
+          </div>
 
-      {/* ACTION BUTTONS */}
-      {mode === "login" && (
-        <button onClick={handleLogin}>Login</button>
-      )}
+          <button type="submit" style={{ marginTop: "16px" }}>
+            {mode === "login" ? "Login" : "Sign Up"}
+          </button>
+        </form>
 
-      {mode === "signup" && (
-        <button onClick={handleSignupRequest}>
-          Send Signup OTP
-        </button>
-      )}
-
-      {mode === "signup-otp" && (
-        <button onClick={handleSignupVerify}>
-          Verify OTP & Create Account
-        </button>
-      )}
-
-      {mode === "forgot" && (
-        <button onClick={handleForgotPassword}>
-          Send OTP
-        </button>
-      )}
-
-      {mode === "otp" && (
-        <button onClick={handleResetPassword}>
-          Reset Password
-        </button>
-      )}
-
-      <br /><br />
-
-      {/* MODE SWITCH LINKS */}
-      {mode === "login" && (
-        <>
-          <p
-            style={{ cursor: "pointer", color: "blue" }}
-            onClick={() => setMode("signup")}
-          >
-            No account? Signup
-          </p>
-          <p
-            style={{ cursor: "pointer", color: "blue" }}
-            onClick={() => setMode("forgot")}
-          >
-            Forgot password?
-          </p>
-        </>
-      )}
-
-      {(mode === "signup" ||
-        mode === "signup-otp" ||
-        mode === "forgot" ||
-        mode === "otp") && (
-        <p
-          style={{ cursor: "pointer", color: "blue" }}
-          onClick={() => setMode("login")}
-        >
-          Back to Login
-        </p>
-      )}
+        {/* FOOTER */}
+        <div style={{ marginTop: "22px", fontSize: "14px" }}>
+          {mode === "login" ? (
+            <>
+              Don’t have an account?{" "}
+              <span
+                style={linkStyle}
+                onClick={() => setMode("signup")}
+              >
+                Sign up
+              </span>
+            </>
+          ) : (
+            <>
+              Already have an account?{" "}
+              <span
+                style={linkStyle}
+                onClick={() => setMode("login")}
+              >
+                Login
+              </span>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
+
+/* ===============================
+   STYLES
+=============================== */
+
+const pageStyle = {
+  minHeight: "100vh",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background:
+    "radial-gradient(circle at top, #1DB95422, #000 60%)"
+};
+
+const cardStyle = {
+  width: "380px",
+  maxWidth: "92%",
+  padding: "32px",
+  borderRadius: "16px",
+  background: "rgba(24, 24, 24, 0.65)",
+  backdropFilter: "blur(14px)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+  textAlign: "center"
+};
+
+const subText = {
+  color: "#b3b3b3",
+  fontSize: "14px",
+  marginBottom: "22px"
+};
+
+const linkStyle = {
+  color: "#1DB954",
+  cursor: "pointer",
+  fontWeight: "500"
+};
+
+const eyeStyle = {
+  position: "absolute",
+  right: "12px",
+  top: "37%",
+  transform: "translateY(-50%)",
+  cursor: "pointer",
+  fontSize: "14px",
+  opacity: 0.8
+};

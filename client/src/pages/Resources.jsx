@@ -1,19 +1,23 @@
 import { Link, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { syllabus } from "../data/syllabus";
 import UploadModal from "../components/UploadModal";
 
 /* TEMP MOCK FILES (READ ONLY) */
 const mockFiles = [
-  { name: "Lecture Notes.pdf", type: "PDF" },
-  { name: "Midterm Solutions.docx", type: "DOCX" },
-  { name: "Formula Sheet.tex", type: "LaTeX" }
+  { name: "Lecture Notes.pdf[MOCK FILE]", type: "PDF" },
+  { name: "Midterm Solutions.docx[MOCK FILE]", type: "DOCX" },
+  { name: "Formula Sheet.tex[MOCK FILE]", type: "LaTeX" }
 ];
+
 
 export default function Resources() {
   const { semesterId, courseCode } = useParams();
   const token = localStorage.getItem("token");
+
   const [showUpload, setShowUpload] = useState(false);
+  const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   /* ===============================
      SEMESTER VIEW
@@ -31,7 +35,6 @@ export default function Resources() {
           }}
         >
           <h1>Resources</h1>
-
           {token && (
             <button onClick={() => setShowUpload(true)}>
               Upload Resource
@@ -158,12 +161,33 @@ export default function Resources() {
   }
 
   /* ===============================
-     FILE VIEW
+     FILE VIEW (REAL DATA)
   =============================== */
   const decodedCode = courseCode.replace("-", " ");
   const course = semester.courses.find(
     c => c.code === decodedCode
   );
+
+  useEffect(() => {
+    if (!semesterId || !courseCode) return;
+
+    const fetchFiles = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `http://localhost:5050/api/resources/${semesterId}/${courseCode}`
+        );
+        const data = await res.json();
+        setFiles(data);
+      } catch (err) {
+        console.error("Failed to fetch files");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFiles();
+  }, [semesterId, courseCode]);
 
   if (!course) {
     return <p style={{ padding: "40px" }}>Invalid course</p>;
@@ -204,30 +228,64 @@ export default function Resources() {
 
       {/* FILE LIST */}
       <div className="card">
-        {mockFiles.map((file, i) => (
-          <div
-            key={i}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "12px 0",
-              borderBottom:
-                i !== mockFiles.length - 1
-                  ? "1px solid #2a2a2a"
-                  : "none"
-            }}
-          >
-            <span>{file.name}</span>
-            <span
+        {loading && <p>Loading files...</p>}
+
+        {!loading && files.length === 0 && (
+          <p style={{ color: "#b3b3b3" }}>
+            No files uploaded for this course yet.
+          </p>
+        )}
+
+        {!loading &&
+          files.map((file, i) => (
+            <div
+              key={file._id}
               style={{
-                fontSize: "12px",
-                color: "#b3b3b3"
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "12px 0",
+                borderBottom:
+                  i !== files.length - 1
+                    ? "1px solid #2a2a2a"
+                    : "none"
               }}
             >
-              {file.type}
-            </span>
-          </div>
-        ))}
+              <a
+                href={`http://localhost:5050/${file.filePath.replace(
+                  /\\/g,
+                  "/"
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "#1DB954" }}
+              >
+                {file.originalName}
+              </a>
+
+              <div style={{ textAlign: "right" }}>
+            <div
+                style={{
+                fontSize: "12px",
+                color: "#b3b3b3"
+            }}
+            >
+                {file.fileType}
+            </div>
+
+  {file.uploadedBy?.name && (
+    <div
+      style={{
+        fontSize: "11px",
+        color: "#888",
+        marginTop: "2px"
+      }}
+    >
+      uploaded by {file.uploadedBy.name}
+    </div>
+  )}
+</div>
+            </div>
+          ))}
       </div>
 
       <p

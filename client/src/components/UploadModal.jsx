@@ -11,24 +11,45 @@ export default function UploadModal({ onClose }) {
       ? syllabus[semester].courses
       : [];
 
-  const handleSubmit = e => {
-    e.preventDefault();
+  const handleSubmit = async e => {
+  e.preventDefault();
 
-    if (!semester || !course || !file) {
-      alert("Please select semester, course and file");
+  if (!semester || !course || !file) {
+    alert("Please select semester, course and file");
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in");
       return;
     }
 
-    // FRONTEND-ONLY SIMULATION
-    console.log("Uploading:", {
-      semester,
-      course,
-      file
+    const formData = new FormData();
+    formData.append("semester", semester);
+    formData.append("courseCode", course);
+    formData.append("file", file);
+
+    const res = await fetch("http://localhost:5050/api/resources/upload", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: formData
     });
 
-    alert("File uploaded successfully (simulated)");
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || "Upload failed");
+    }
+
+    alert("File uploaded successfully");
     onClose();
-  };
+  } catch (err) {
+    alert(err.message);
+  }
+};
 
   return (
     <div style={overlayStyle}>

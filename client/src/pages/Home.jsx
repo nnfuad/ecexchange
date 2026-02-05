@@ -1,4 +1,11 @@
 import { useEffect, useState } from "react";
+import bg0 from "../assets/bg0.jpeg";
+import bg1 from "../assets/bg1.JPG";
+import bg2 from "../assets/bg2.JPG";
+import bg3 from "../assets/bg3.jpg";
+import bg4 from "../assets/bg4.jpeg";
+import bg5 from "../assets/bg5.jpeg";
+import bg6 from "../assets/bg6.jpg";
 
 const quotes = [
   "Education is not the learning of facts, but the training of the mind to think.",
@@ -8,12 +15,7 @@ const quotes = [
   "Success is the sum of small efforts repeated day in and day out."
 ];
 
-const bgImages = [
-  "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
-  "https://images.unsplash.com/photo-1503676260728-1c00da094a0b",
-  "https://images.unsplash.com/photo-1513258496099-48168024aec0",
-  "https://images.unsplash.com/photo-1509062522246-3755977927d7"
-];
+const bgImages = [ bg1, bg0, bg2, bg3, bg4, bg5, bg6];
 
 export default function Home() {
   const [quote, setQuote] = useState("");
