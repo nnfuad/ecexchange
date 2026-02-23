@@ -3,13 +3,7 @@ import { useEffect, useState } from "react";
 import { syllabus } from "../data/syllabus";
 import UploadModal from "../components/UploadModal";
 
-/* TEMP MOCK FILES (READ ONLY) */
-const mockFiles = [
-  { name: "Lecture Notes.pdf[MOCK FILE]", type: "PDF" },
-  { name: "Midterm Solutions.docx[MOCK FILE]", type: "DOCX" },
-  { name: "Formula Sheet.tex[MOCK FILE]", type: "LaTeX" }
-];
-
+const BASE_URL = "http://localhost:5050";
 
 export default function Resources() {
   const { semesterId, courseCode } = useParams();
@@ -19,19 +13,51 @@ export default function Resources() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Safely derive semester and course
+  const semester = semesterId ? syllabus[semesterId] : null;
+  const decodedCode = courseCode?.replace("-", " ");
+  const course = semester?.courses?.find(
+    (c) => c.code === decodedCode
+  );
+
+  /* ===============================
+     FETCH FILES SAFELY
+  =============================== */
+  useEffect(() => {
+    if (!semesterId || !courseCode) return;
+
+    const fetchFiles = async () => {
+      try {
+        setLoading(true);
+
+        const res = await fetch(
+          `${BASE_URL}/api/resources/${semesterId}/${courseCode}`
+        );
+
+        const data = await res.json();
+        setFiles(data);
+      } catch (err) {
+        console.error("Failed to fetch files:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFiles();
+  }, [semesterId, courseCode]);
+
   /* ===============================
      SEMESTER VIEW
   =============================== */
   if (!semesterId) {
     return (
       <div style={{ padding: "40px 60px", width: "100%" }}>
-        {/* HEADER */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "30px"
+            marginBottom: "30px",
+            alignItems: "center"
           }}
         >
           <h1>Resources</h1>
@@ -42,11 +68,11 @@ export default function Resources() {
           )}
         </div>
 
-        {/* SEMESTER GRID */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(180px, 1fr))",
             gap: "30px"
           }}
         >
@@ -61,7 +87,6 @@ export default function Resources() {
                 alignItems: "center",
                 justifyContent: "center",
                 fontWeight: "600",
-                fontSize: "16px",
                 textAlign: "center"
               }}
             >
@@ -77,9 +102,15 @@ export default function Resources() {
     );
   }
 
-  const semester = syllabus[semesterId];
+  /* ===============================
+     INVALID SEMESTER GUARD
+  =============================== */
   if (!semester) {
-    return <p style={{ padding: "40px" }}>Invalid semester</p>;
+    return (
+      <p style={{ padding: "40px" }}>
+        Invalid semester
+      </p>
+    );
   }
 
   /* ===============================
@@ -88,13 +119,12 @@ export default function Resources() {
   if (!courseCode) {
     return (
       <div style={{ padding: "40px 60px", width: "100%" }}>
-        {/* HEADER */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "20px"
+            marginBottom: "20px",
+            alignItems: "center"
           }}
         >
           <Link to="/resources" style={{ color: "#1DB954" }}>
@@ -108,22 +138,24 @@ export default function Resources() {
           )}
         </div>
 
-        <h1 style={{ marginBottom: "30px" }}>{semester.title}</h1>
+        <h1 style={{ marginBottom: "30px" }}>
+          {semester.title}
+        </h1>
 
-        {/* COURSE GRID */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(260px, 1fr))",
             gap: "24px"
           }}
         >
-          {semester.courses.map(course => {
-            const safeCode = course.code.replace(" ", "-");
+          {semester.courses.map((c) => {
+            const safeCode = c.code.replace(" ", "-");
 
             return (
               <Link
-                key={course.code + course.title}
+                key={c.code + c.title}
                 to={`/resources/${semesterId}/${safeCode}`}
                 className="card"
                 style={{
@@ -132,10 +164,10 @@ export default function Resources() {
                 }}
               >
                 <h3 style={{ fontSize: "15px" }}>
-                  {course.code}: {course.title}
+                  {c.code}: {c.title}
                 </h3>
 
-                {course.credits && (
+                {c.credits && (
                   <span
                     style={{
                       position: "absolute",
@@ -145,7 +177,7 @@ export default function Resources() {
                       color: "#b3b3b3"
                     }}
                   >
-                    {course.credits} credits
+                    {c.credits} credits
                   </span>
                 )}
               </Link>
@@ -161,47 +193,27 @@ export default function Resources() {
   }
 
   /* ===============================
-     FILE VIEW (REAL DATA)
+     INVALID COURSE GUARD
   =============================== */
-  const decodedCode = courseCode.replace("-", " ");
-  const course = semester.courses.find(
-    c => c.code === decodedCode
-  );
-
-  useEffect(() => {
-    if (!semesterId || !courseCode) return;
-
-    const fetchFiles = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `http://localhost:5050/api/resources/${semesterId}/${courseCode}`
-        );
-        const data = await res.json();
-        setFiles(data);
-      } catch (err) {
-        console.error("Failed to fetch files");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFiles();
-  }, [semesterId, courseCode]);
-
   if (!course) {
-    return <p style={{ padding: "40px" }}>Invalid course</p>;
+    return (
+      <p style={{ padding: "40px" }}>
+        Invalid course
+      </p>
+    );
   }
 
+  /* ===============================
+     FILE VIEW
+  =============================== */
   return (
     <div style={{ padding: "40px 60px", width: "100%" }}>
-      {/* HEADER */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "16px"
+          marginBottom: "16px",
+          alignItems: "center"
         }}
       >
         <Link
@@ -222,11 +234,15 @@ export default function Resources() {
         {course.code}: {course.title}
       </h1>
 
-      <p style={{ color: "#b3b3b3", marginBottom: "20px" }}>
+      <p
+        style={{
+          color: "#b3b3b3",
+          marginBottom: "20px"
+        }}
+      >
         {course.credits} credits • Read-only resources
       </p>
 
-      {/* FILE LIST */}
       <div className="card">
         {loading && <p>Loading files...</p>}
 
@@ -251,7 +267,7 @@ export default function Resources() {
               }}
             >
               <a
-                href={`http://localhost:5050/${file.filePath.replace(
+                href={`${BASE_URL}${file.filePath.replace(
                   /\\/g,
                   "/"
                 )}`}
@@ -263,27 +279,27 @@ export default function Resources() {
               </a>
 
               <div style={{ textAlign: "right" }}>
-            <div
-                style={{
-                fontSize: "12px",
-                color: "#b3b3b3"
-            }}
-            >
-                {file.fileType}
-            </div>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#b3b3b3"
+                  }}
+                >
+                  {file.fileType}
+                </div>
 
-  {file.uploadedBy?.name && (
-    <div
-      style={{
-        fontSize: "11px",
-        color: "#888",
-        marginTop: "2px"
-      }}
-    >
-      uploaded by {file.uploadedBy.name}
-    </div>
-  )}
-</div>
+                {file.uploadedBy?.name && (
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#888",
+                      marginTop: "2px"
+                    }}
+                  >
+                    uploaded by {file.uploadedBy.name}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
       </div>
@@ -295,7 +311,8 @@ export default function Resources() {
           color: "#b3b3b3"
         }}
       >
-        Files are read-only. Uploads are available to logged-in users only.
+        Files are read-only. Uploads are available to
+        logged-in users only.
       </p>
 
       {showUpload && (

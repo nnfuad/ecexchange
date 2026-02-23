@@ -2,29 +2,14 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true
-    },
-    roll: {
-      type: String,
-      required: true
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true
-    },
-    password: {
-      type: String,
-      required: true
-    },
-    role: {
-      type: String,
-      default: "member"
-    },
+    name: { type: String, required: true },
+    roll: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, default: "member" },
 
-    // 🔐 Forgot-password OTP fields
+    // OTP & verification
+    isVerified: { type: Boolean, default: false },
     otp: String,
     otpExpires: Date
   },

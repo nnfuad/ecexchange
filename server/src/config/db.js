@@ -11,3 +11,7 @@ const connectDB = async () => {
 };
 
 module.exports = connectDB;
+
+mongoose.connection.once("open", () => {
+  console.log("Connected to DB name:", mongoose.connection.name);
+}); // Log DB name on successful connection
