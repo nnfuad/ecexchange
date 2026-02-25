@@ -76,6 +76,24 @@ export default function About() {
 
           {/* ================= CARD 4 ================= */}
           <div className="glass-card">
+  <h3 style={{ color: "#1DB954" }}>Community Standards</h3>
+
+  <ul style={{ marginTop: "12px", color: "#b3b3b3", fontSize: "14px", lineHeight: "1.6" }}>
+    <li>Upload only academic resources related to ECE curriculum.</li>
+    <li>No copyrighted books unless legally allowed.</li>
+    <li>No offensive, political, or unrelated content.</li>
+    <li>No malicious or executable harmful files.</li>
+    <li>Respect intellectual property of peers and faculty.</li>
+    <li>Admins reserve the right to remove any content.</li>
+  </ul>
+
+  <p style={{ marginTop: "10px", fontSize: "13px", color: "#b3b3b3" }}>
+    Violation of guidelines may result in account suspension.
+  </p>
+</div>
+          
+          {/* ================= CARD 5 ================= */}
+          <div className="glass-card">
             <h3>Vision & Future Development</h3>
             <p>
               The primary aim of this website is to provide a centralized,

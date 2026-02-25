@@ -5,87 +5,105 @@ export default function UploadModal({ onClose }) {
   const [semester, setSemester] = useState("");
   const [course, setCourse] = useState("");
   const [file, setFile] = useState(null);
+  const [agreed, setAgreed] = useState(false);
 
   const courses =
     semester && syllabus[semester]
       ? syllabus[semester].courses
       : [];
 
-  const handleSubmit = async e => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (!semester || !course || !file) {
-    alert("Please select semester, course and file");
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("You must be logged in");
+    if (!semester || !course || !file) {
+      alert("Please select semester, course and file");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("semester", semester);
-    formData.append("courseCode", course);
-    formData.append("file", file);
-
-    const res = await fetch("http://localhost:5050/api/resources/upload", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      body: formData
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || "Upload failed");
+    if (!agreed) {
+      alert("You must agree to the community standards");
+      return;
     }
 
-    alert("File uploaded successfully");
-    onClose();
-  } catch (err) {
-    alert(err.message);
-  }
-};
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must be logged in");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("semester", semester);
+      formData.append("courseCode", course);
+      formData.append("file", file);
+
+      const res = await fetch(
+        "http://localhost:5050/api/resources/upload",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          body: formData
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Upload failed");
+      }
+
+      alert("File uploaded successfully");
+      onClose();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   return (
     <div style={overlayStyle}>
       <div style={modalStyle} className="card">
-        <h2 style={{ marginBottom: "16px" }}>Upload Resource</h2>
+        <h2 style={{ marginBottom: "16px" }}>
+          Upload Resource
+        </h2>
 
         <form onSubmit={handleSubmit}>
           {/* SEMESTER */}
           <label>Semester</label>
           <select
             value={semester}
-            onChange={e => {
+            onChange={(e) => {
               setSemester(e.target.value);
               setCourse("");
             }}
             style={inputStyle}
           >
             <option value="">Select semester</option>
-            {Object.entries(syllabus).map(([key, val]) => (
-              <option key={key} value={key}>
-                {val.title}
-              </option>
-            ))}
+            {Object.entries(syllabus).map(
+              ([key, val]) => (
+                <option key={key} value={key}>
+                  {val.title}
+                </option>
+              )
+            )}
           </select>
 
           {/* COURSE */}
           <label>Course / Category</label>
           <select
             value={course}
-            onChange={e => setCourse(e.target.value)}
+            onChange={(e) =>
+              setCourse(e.target.value)
+            }
             style={inputStyle}
             disabled={!semester}
           >
             <option value="">Select course</option>
-            {courses.map(c => (
-              <option key={c.code} value={c.code}>
+            {courses.map((c) => (
+              <option
+                key={c.code}
+                value={c.code}
+              >
                 {c.code}: {c.title}
               </option>
             ))}
@@ -95,9 +113,56 @@ export default function UploadModal({ onClose }) {
           <label>File</label>
           <input
             type="file"
-            onChange={e => setFile(e.target.files[0])}
+            onChange={(e) =>
+              setFile(e.target.files[0])
+            }
             style={{ marginBottom: "16px" }}
           />
+
+          {/* COMMUNITY WARNING */}
+          <div
+            style={{
+              fontSize: "13px",
+              color: "#b3b3b3",
+              marginBottom: "10px"
+            }}
+          >
+            <ul>
+              <li>
+                Academic content only.
+              </li>
+              <li>
+                No copyrighted material
+                without permission.
+              </li>
+              <li>
+                No harmful or malicious
+                files.
+              </li>
+              <li>
+                No offensive or
+                inappropriate content.
+              </li>
+            </ul>
+          </div>
+
+          <label
+            style={{
+              fontSize: "13px",
+              display: "block",
+              marginBottom: "16px"
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={() =>
+                setAgreed(!agreed)
+              }
+            />{" "}
+            I agree to the community
+            standards
+          </label>
 
           {/* ACTIONS */}
           <div
@@ -109,12 +174,17 @@ export default function UploadModal({ onClose }) {
           >
             <button
               type="button"
-              className="secondary"
               onClick={onClose}
             >
               Cancel
             </button>
-            <button type="submit">Upload</button>
+
+            <button
+              type="submit"
+              disabled={!agreed}
+            >
+              Upload
+            </button>
           </div>
         </form>
       </div>

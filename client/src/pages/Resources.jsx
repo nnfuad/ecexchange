@@ -12,16 +12,42 @@ export default function Resources() {
   const [showUpload, setShowUpload] = useState(false);
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Safely derive semester and course
-  const semester = semesterId ? syllabus[semesterId] : null;
-  const decodedCode = courseCode?.replace("-", " ");
+  /* ===============================
+     SAFE TOKEN DECODE
+  =============================== */
+  let currentUserId = null;
+
+  try {
+    if (token) {
+      const payload = JSON.parse(
+        atob(token.split(".")[1])
+      );
+      currentUserId = payload.id;
+    }
+  } catch (err) {
+    console.error("Token decode failed:", err);
+    currentUserId = null;
+  }
+
+  /* ===============================
+     DERIVE SEMESTER + COURSE SAFELY
+  =============================== */
+  const semester = semesterId
+    ? syllabus[semesterId]
+    : null;
+
+  const decodedCode = courseCode
+    ? courseCode.replace("-", " ")
+    : null;
+
   const course = semester?.courses?.find(
     (c) => c.code === decodedCode
   );
 
   /* ===============================
-     FETCH FILES SAFELY
+     FETCH FILES
   =============================== */
   useEffect(() => {
     if (!semesterId || !courseCode) return;
@@ -35,9 +61,15 @@ export default function Resources() {
         );
 
         const data = await res.json();
-        setFiles(data);
+
+        if (Array.isArray(data)) {
+          setFiles(data);
+        } else {
+          setFiles([]);
+        }
       } catch (err) {
-        console.error("Failed to fetch files:", err);
+        console.error("Fetch failed:", err);
+        setFiles([]);
       } finally {
         setLoading(false);
       }
@@ -47,20 +79,20 @@ export default function Resources() {
   }, [semesterId, courseCode]);
 
   /* ===============================
-     SEMESTER VIEW
+     SEMESTER LIST VIEW
   =============================== */
   if (!semesterId) {
     return (
-      <div style={{ padding: "40px 60px", width: "100%" }}>
+      <div style={{ padding: "40px 60px" }}>
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            marginBottom: "30px",
             alignItems: "center"
           }}
         >
           <h1>Resources</h1>
+
           {token && (
             <button onClick={() => setShowUpload(true)}>
               Upload Resource
@@ -72,38 +104,35 @@ export default function Resources() {
           style={{
             display: "grid",
             gridTemplateColumns:
-              "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: "30px"
+              "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "30px",
+            marginTop: "30px"
           }}
         >
-          {Object.entries(syllabus).map(([key, value]) => (
-            <Link
-              key={key}
-              to={`/resources/${key}`}
-              className="card"
-              style={{
-                aspectRatio: "1 / 1",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: "600",
-                textAlign: "center"
-              }}
-            >
-              {value.title}
-            </Link>
-          ))}
+          {Object.entries(syllabus).map(
+            ([key, value]) => (
+              <Link
+                key={key}
+                to={`/resources/${key}`}
+                className="card"
+              >
+                {value.title}
+              </Link>
+            )
+          )}
         </div>
 
         {showUpload && (
-          <UploadModal onClose={() => setShowUpload(false)} />
+          <UploadModal
+            onClose={() => setShowUpload(false)}
+          />
         )}
       </div>
     );
   }
 
   /* ===============================
-     INVALID SEMESTER GUARD
+     INVALID SEMESTER
   =============================== */
   if (!semester) {
     return (
@@ -114,31 +143,16 @@ export default function Resources() {
   }
 
   /* ===============================
-     COURSE VIEW
+     COURSE LIST VIEW
   =============================== */
   if (!courseCode) {
     return (
-      <div style={{ padding: "40px 60px", width: "100%" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: "20px",
-            alignItems: "center"
-          }}
-        >
-          <Link to="/resources" style={{ color: "#1DB954" }}>
-            ← Back to semesters
-          </Link>
+      <div style={{ padding: "40px 60px" }}>
+        <Link to="/resources">
+          ← Back to semesters
+        </Link>
 
-          {token && (
-            <button onClick={() => setShowUpload(true)}>
-              Upload Resource
-            </button>
-          )}
-        </div>
-
-        <h1 style={{ marginBottom: "30px" }}>
+        <h1 style={{ marginTop: "20px" }}>
           {semester.title}
         </h1>
 
@@ -147,53 +161,37 @@ export default function Resources() {
             display: "grid",
             gridTemplateColumns:
               "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: "24px"
+            gap: "20px",
+            marginTop: "30px"
           }}
         >
           {semester.courses.map((c) => {
-            const safeCode = c.code.replace(" ", "-");
+            const safeCode = c.code.replace(
+              " ",
+              "-"
+            );
 
             return (
               <Link
                 key={c.code + c.title}
                 to={`/resources/${semesterId}/${safeCode}`}
                 className="card"
-                style={{
-                  position: "relative",
-                  paddingBottom: "38px"
-                }}
               >
-                <h3 style={{ fontSize: "15px" }}>
-                  {c.code}: {c.title}
-                </h3>
-
-                {c.credits && (
-                  <span
-                    style={{
-                      position: "absolute",
-                      bottom: "14px",
-                      right: "16px",
-                      fontSize: "12px",
-                      color: "#b3b3b3"
-                    }}
-                  >
-                    {c.credits} credits
-                  </span>
-                )}
+                <strong>
+                  {c.code}
+                </strong>
+                <br />
+                {c.title}
               </Link>
             );
           })}
         </div>
-
-        {showUpload && (
-          <UploadModal onClose={() => setShowUpload(false)} />
-        )}
       </div>
     );
   }
 
   /* ===============================
-     INVALID COURSE GUARD
+     INVALID COURSE
   =============================== */
   if (!course) {
     return (
@@ -204,119 +202,190 @@ export default function Resources() {
   }
 
   /* ===============================
+     FILTER FILES
+  =============================== */
+  const filteredFiles = files.filter(
+    (file) =>
+      file.originalName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase())
+  );
+
+  /* ===============================
      FILE VIEW
   =============================== */
   return (
-    <div style={{ padding: "40px 60px", width: "100%" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "16px",
-          alignItems: "center"
-        }}
+    <div style={{ padding: "40px 60px" }}>
+      <Link
+        to={`/resources/${semesterId}`}
       >
-        <Link
-          to={`/resources/${semesterId}`}
-          style={{ color: "#1DB954" }}
-        >
-          ← Back to courses
-        </Link>
+        ← Back to courses
+      </Link>
 
-        {token && (
-          <button onClick={() => setShowUpload(true)}>
-            Upload Resource
-          </button>
-        )}
-      </div>
-
-      <h1 style={{ marginBottom: "6px" }}>
+      <h1 style={{ marginTop: "20px" }}>
         {course.code}: {course.title}
       </h1>
 
-      <p
+      {token && (
+        <button
+          style={{ marginTop: "10px" }}
+          onClick={() => setShowUpload(true)}
+        >
+          Upload Resource
+        </button>
+      )}
+
+      <input
+        type="text"
+        placeholder="Search within this course..."
+        value={searchTerm}
+        onChange={(e) =>
+          setSearchTerm(e.target.value)
+        }
         style={{
-          color: "#b3b3b3",
-          marginBottom: "20px"
+          marginTop: "20px",
+          padding: "10px",
+          width: "100%",
+          borderRadius: "8px",
+          border: "1px solid #333",
+          background: "#111",
+          color: "white"
         }}
+      />
+
+      <div
+        className="card"
+        style={{ marginTop: "20px" }}
       >
-        {course.credits} credits • Read-only resources
-      </p>
-
-      <div className="card">
-        {loading && <p>Loading files...</p>}
-
-        {!loading && files.length === 0 && (
-          <p style={{ color: "#b3b3b3" }}>
-            No files uploaded for this course yet.
-          </p>
-        )}
+        {loading && <p>Loading...</p>}
 
         {!loading &&
-          files.map((file, i) => (
+          filteredFiles.length === 0 && (
+            <p style={{ color: "#888" }}>
+              No files found.
+            </p>
+          )}
+
+        {!loading &&
+          filteredFiles.map((file) => (
             <div
               key={file._id}
               style={{
                 display: "flex",
-                justifyContent: "space-between",
+                justifyContent:
+                  "space-between",
                 padding: "12px 0",
                 borderBottom:
-                  i !== files.length - 1
-                    ? "1px solid #2a2a2a"
-                    : "none"
+                  "1px solid #222"
               }}
             >
               <a
-                href={`${BASE_URL}${file.filePath.replace(
-                  /\\/g,
-                  "/"
-                )}`}
+                href={`${BASE_URL}${file.filePath}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "#1DB954" }}
               >
                 {file.originalName}
               </a>
 
-              <div style={{ textAlign: "right" }}>
+              <div
+                style={{
+                  textAlign: "right"
+                }}
+              >
                 <div
                   style={{
-                    fontSize: "12px",
-                    color: "#b3b3b3"
+                    fontSize: "12px"
                   }}
                 >
                   {file.fileType}
                 </div>
 
-                {file.uploadedBy?.name && (
+                {file.uploadedBy
+                  ?.name && (
                   <div
                     style={{
-                      fontSize: "11px",
-                      color: "#888",
-                      marginTop: "2px"
+                      fontSize:
+                        "11px",
+                      color:
+                        "#888"
                     }}
                   >
-                    uploaded by {file.uploadedBy.name}
+                    uploaded by{" "}
+                    {
+                      file
+                        .uploadedBy
+                        .name
+                    }
                   </div>
                 )}
+
+                {currentUserId &&
+                  file.uploadedBy
+                    ?._id ===
+                    currentUserId && (
+                    <button
+                      onClick={async () => {
+                        if (
+                          !window.confirm(
+                            "Delete this file?"
+                          )
+                        )
+                          return;
+
+                        await fetch(
+                          `${BASE_URL}/api/resources/${file._id}`,
+                          {
+                            method:
+                              "DELETE",
+                            headers:
+                              {
+                                Authorization:
+                                  `Bearer ${token}`
+                              }
+                          }
+                        );
+
+                        setFiles(
+                          files.filter(
+                            (f) =>
+                              f._id !==
+                              file._id
+                          )
+                        );
+                      }}
+                      style={{
+                        fontSize:
+                          "11px",
+                        background:
+                          "#400",
+                        color:
+                          "white",
+                        border:
+                          "none",
+                        padding:
+                          "4px 8px",
+                        borderRadius:
+                          "6px",
+                        marginTop:
+                          "6px",
+                        cursor:
+                          "pointer"
+                      }}
+                    >
+                      Delete
+                    </button>
+                  )}
               </div>
             </div>
           ))}
       </div>
 
-      <p
-        style={{
-          marginTop: "12px",
-          fontSize: "13px",
-          color: "#b3b3b3"
-        }}
-      >
-        Files are read-only. Uploads are available to
-        logged-in users only.
-      </p>
-
       {showUpload && (
-        <UploadModal onClose={() => setShowUpload(false)} />
+        <UploadModal
+          onClose={() =>
+            setShowUpload(false)
+          }
+        />
       )}
     </div>
   );
