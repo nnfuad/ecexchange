@@ -1,106 +1,135 @@
 const express = require("express");
+const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
 const Resource = require("../models/Resource");
-const authMiddleware = require("../middleware/authMiddleware");
+const auth = require("../middleware/auth");
 
-const router = express.Router();
+/* ===============================
+   TEMP STORAGE (NO BODY ACCESS HERE)
+=============================== */
 
-/* =========================================
-   MULTER STORAGE CONFIGURATION
-========================================= */
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const { semester, courseCode } = req.body;
-
-    if (!semester || !courseCode) {
-      return cb(new Error("Semester and courseCode required"));
-    }
-
-    // Create safe folder name
-    const safeCourse = courseCode.replace(/\s+/g, "-");
-
-    const uploadPath = path.join(
-      __dirname,
-      "../../uploads",
-      semester,
-      safeCourse
-    );
-
-    fs.mkdirSync(uploadPath, { recursive: true });
-
-    cb(null, uploadPath);
-  },
-
-  filename: function (req, file, cb) {
-    const uniqueName =
-      Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueName + path.extname(file.originalname));
-  }
+const upload = multer({
+  dest: path.join(__dirname, "../../uploads/tmp")
 });
 
-const upload = multer({ storage });
-
-/* =========================================
-   UPLOAD RESOURCE (AUTH REQUIRED)
-========================================= */
+/* ===============================
+   UPLOAD ROUTE
+=============================== */
 
 router.post(
   "/upload",
-  authMiddleware,
+  auth,
   upload.single("file"),
   async (req, res) => {
     try {
       const { semester, courseCode } = req.body;
-
-      if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
+      console.log("BODY:", req.body);
+      console.log("FILE:", req.file); 
+      if (!semester || !courseCode || !req.file) {
+        return res.status(400).json({
+          message: "Missing required fields"
+        });
       }
 
-      const safeCourse = courseCode.replace(/\s+/g, "-");
+      const safeCourse = courseCode.replace(/\s/g, "-");
 
-      // IMPORTANT: store RELATIVE path, not absolute path
-      const relativePath = `/uploads/${semester}/${safeCourse}/${req.file.filename}`;
-
-      const newResource = await Resource.create({
-        originalName: req.file.originalname,
-        fileType: req.file.mimetype,
-        filePath: relativePath,
+      const finalDir = path.join(
+        __dirname,
+        "../../uploads",
         semester,
-        courseCode: safeCourse,
+        safeCourse
+      );
+
+      fs.mkdirSync(finalDir, { recursive: true });
+
+      const finalPath = path.join(
+        finalDir,
+        req.file.filename + path.extname(req.file.originalname)
+      );
+
+      fs.renameSync(req.file.path, finalPath);
+
+      const filePath =
+        "/uploads/" +
+        semester +
+        "/" +
+        safeCourse +
+        "/" +
+        path.basename(finalPath);
+
+      const resource = await Resource.create({
+        semester,
+        courseCode,
+        originalName: req.file.originalname,
+        filename: path.basename(finalPath),
+        filePath,
+        fileType: req.file.mimetype,
         uploadedBy: req.user.id
       });
 
-      res.status(201).json(newResource);
-
+      res.json(resource);
     } catch (err) {
       console.error("Upload error:", err);
-      res.status(500).json({ message: "Upload failed" });
+      res.status(500).json({
+        message: "Upload failed"
+      });
     }
   }
 );
 
-/* =========================================
-   GET FILES BY SEMESTER & COURSE
-========================================= */
+/* ===============================
+   GET FILES
+=============================== */
 
 router.get("/:semester/:courseCode", async (req, res) => {
   try {
     const { semester, courseCode } = req.params;
 
+    const normalizedCourse = courseCode.replace(/-/g, " ");
+
     const files = await Resource.find({
       semester,
-      courseCode
+      courseCode: normalizedCourse
     }).populate("uploadedBy", "name");
 
     res.json(files);
+  } catch {
+    res.status(500).json({ message: "Fetch failed" });
+  }
+});
 
-  } catch (err) {
-    console.error("Fetch error:", err);
-    res.status(500).json({ message: "Failed to fetch resources" });
+/* ===============================
+   DELETE FILE
+=============================== */
+
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    const file = await Resource.findById(req.params.id);
+
+    if (!file)
+      return res.status(404).json({ message: "Not found" });
+
+    if (file.uploadedBy.toString() !== req.user.id)
+      return res.status(403).json({ message: "Not allowed" });
+
+    const absolutePath = path.join(
+      __dirname,
+      "../../",
+      file.filePath
+    );
+
+    if (fs.existsSync(absolutePath)) {
+      fs.unlinkSync(absolutePath);
+    }
+
+    await file.deleteOne();
+
+    res.json({ message: "Deleted" });
+  } catch {
+    res.status(500).json({ message: "Delete failed" });
   }
 });
 

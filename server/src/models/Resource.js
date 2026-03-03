@@ -2,31 +2,29 @@ const mongoose = require("mongoose");
 
 const resourceSchema = new mongoose.Schema(
   {
-    originalName: {
-      type: String,
-      required: true
-    },
-
-    fileType: {
-      type: String,
-      required: true
-    },
-
-    filePath: {
-      type: String,
-      required: true
-    },
-
     semester: {
       type: String,
       required: true
     },
-
     courseCode: {
       type: String,
       required: true
     },
-
+    originalName: {
+      type: String,
+      required: true
+    },
+    filename: {
+      type: String,
+      required: true
+    },
+    filePath: {
+      type: String,
+      required: true
+    },
+    fileType: {
+      type: String
+    },
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -36,4 +34,7 @@ const resourceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Resource", resourceSchema);
+module.exports = mongoose.model(
+  "Resource",
+  resourceSchema
+);
