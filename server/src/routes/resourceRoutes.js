@@ -83,7 +83,7 @@ router.post(
 /* ===============================
    GET FILES
 =============================== */
-
+// Get files for a specific semester and course
 router.get("/:semester/:courseCode", async (req, res) => {
   try {
     const { semester, courseCode } = req.params;
@@ -98,6 +98,40 @@ router.get("/:semester/:courseCode", async (req, res) => {
     res.json(files);
   } catch {
     res.status(500).json({ message: "Fetch failed" });
+  }
+});
+
+// General search endpoint with multiple filters
+router.get("/", async (req, res) => {
+  try {
+    const { semester, courseCode, type, search } = req.query;
+
+    let filter = {};
+
+    if (semester) {
+      filter.semester = semester;
+    }
+
+    if (courseCode) {
+      filter.courseCode = courseCode.replace(/-/g, " ");
+    }
+
+    if (type) {
+      filter.fileType = new RegExp(type, "i");
+    }
+
+    if (search) {
+      filter.originalName = new RegExp(search, "i");
+    }
+
+    const files = await Resource.find(filter)
+      .populate("uploadedBy", "name")
+      .sort({ createdAt: -1 });
+
+    res.json(files);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Search failed" });
   }
 });
 
