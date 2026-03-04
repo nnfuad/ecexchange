@@ -38,7 +38,7 @@ export default function UploadModal({ onClose }) {
       formData.append("file", file);
 
       const res = await fetch(
-        "http://localhost:5050/api/resources/upload",
+        "https://ecexchange-api.onrender.com/api/resources/upload",
         {
           method: "POST",
           headers: {

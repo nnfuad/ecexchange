@@ -12,7 +12,7 @@ export default function Auth() {
     otp: ""
   });
 
-  const API = "http://localhost:5050/api/auth";
+  const API = "https://ecexchange-api.onrender.com/api/auth";
 
   const handleChange = (e) => {
     const { name, value } = e.target;

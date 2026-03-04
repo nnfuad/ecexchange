@@ -34,7 +34,7 @@ export default function Navbar() {
       <div style={{ display: "flex", alignItems: "center", gap: "20px", paddingLeft: "35%" }}>
         
          
-             <Link to="/"><img src="/src/assets/logo.gif" height="85" width="200"/></Link>
+             <Link to="/"><img src="/logo.gif" alt="logo" height="85" width="200"/></Link>
 
         <span style={{ color: "#b3b3b3", fontSize: "14px" }}>
           Learn • Share • Grow
