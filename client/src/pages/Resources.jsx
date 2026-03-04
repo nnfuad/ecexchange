@@ -13,7 +13,6 @@ export default function Resources() {
   const [showUpload, setShowUpload] = useState(false);
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [searchTerm, setSearchTerm] = useState("");
 
   const [globalSearch, setGlobalSearch] = useState("");
@@ -21,9 +20,6 @@ export default function Resources() {
   const [filterSemester, setFilterSemester] = useState("");
   const [globalResults, setGlobalResults] = useState([]);
 
-  /* ===============================
-     TOKEN DECODE
-  =============================== */
   let currentUserId = null;
 
   try {
@@ -35,17 +31,11 @@ export default function Resources() {
     currentUserId = null;
   }
 
-  /* ===============================
-     DERIVE SEMESTER + COURSE
-  =============================== */
-
   const semester = semesterId ? syllabus[semesterId] : null;
   const decodedCode = courseCode ? courseCode.replace(/-/g, " ") : null;
   const course = semester?.courses?.find((c) => c.code === decodedCode);
 
-  /* ===============================
-     FETCH FILES
-  =============================== */
+  /* ---------------- FETCH FILES ---------------- */
 
   useEffect(() => {
     if (!semesterId || !courseCode) return;
@@ -60,7 +50,11 @@ export default function Resources() {
 
         const data = await res.json();
 
-        setFiles(Array.isArray(data) ? data : []);
+        if (Array.isArray(data)) {
+          setFiles(data);
+        } else {
+          setFiles([]);
+        }
       } catch {
         setFiles([]);
       } finally {
@@ -71,9 +65,15 @@ export default function Resources() {
     fetchFiles();
   }, [semesterId, courseCode]);
 
-  /* ===============================
-     GLOBAL SEARCH
-  =============================== */
+  /* ---------------- FILE URL HELPER ---------------- */
+
+  const getFileURL = (file) => {
+    if (file.fileUrl) return file.fileUrl;
+    if (file.filePath) return `${BASE_URL}${file.filePath}`;
+    return "#";
+  };
+
+  /* ---------------- GLOBAL SEARCH ---------------- */
 
   const handleGlobalSearch = async () => {
     try {
@@ -84,7 +84,6 @@ export default function Resources() {
       }).toString();
 
       const res = await fetch(`${BASE_URL}/api/resources?${query}`);
-
       const data = await res.json();
 
       setGlobalResults(Array.isArray(data) ? data : []);
@@ -93,19 +92,7 @@ export default function Resources() {
     }
   };
 
-  /* ===============================
-     FILE LINK HELPER
-  =============================== */
-
-  const getFileLink = (file) => {
-    if (file.fileUrl) return file.fileUrl;
-    if (file.filePath) return `${BASE_URL}${file.filePath}`;
-    return "#";
-  };
-
-  /* ===============================
-     SEMESTER VIEW
-  =============================== */
+  /* ---------------- SEMESTER VIEW ---------------- */
 
   if (!semesterId) {
     return (
@@ -119,8 +106,6 @@ export default function Resources() {
             </button>
           )}
         </div>
-
-        {/* SEARCH */}
 
         <div style={{ marginTop: "30px" }}>
           <input
@@ -161,14 +146,12 @@ export default function Resources() {
           </div>
         </div>
 
-        {/* SEARCH RESULTS */}
-
         {globalResults.length > 0 && (
           <div className="card" style={{ marginTop: "30px" }}>
             {globalResults.map((file) => (
               <div key={file._id} style={fileRow}>
                 <a
-                  href={getFileLink(file)}
+                  href={getFileURL(file)}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -182,8 +165,6 @@ export default function Resources() {
             ))}
           </div>
         )}
-
-        {/* SEMESTERS */}
 
         <div style={semesterGrid}>
           {Object.entries(syllabus).map(([key, value]) => (
@@ -202,9 +183,7 @@ export default function Resources() {
 
   if (!semester) return <p style={{ padding: "40px" }}>Invalid semester</p>;
 
-  /* ===============================
-     COURSE LIST
-  =============================== */
+  /* ---------------- COURSE LIST ---------------- */
 
   if (!courseCode) {
     return (
@@ -240,9 +219,7 @@ export default function Resources() {
     file.originalName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  /* ===============================
-     FILE VIEW
-  =============================== */
+  /* ---------------- FILE VIEW ---------------- */
 
   return (
     <div style={{ padding: "40px 20px" }}>
@@ -280,7 +257,7 @@ export default function Resources() {
           filteredFiles.map((file) => (
             <div key={file._id} style={fileRow}>
               <a
-                href={getFileLink(file)}
+                href={getFileURL(file)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -295,30 +272,6 @@ export default function Resources() {
                     uploaded by {file.uploadedBy.name}
                   </div>
                 )}
-
-                {currentUserId &&
-                  file.uploadedBy?._id === currentUserId && (
-                    <button
-                      onClick={async () => {
-                        if (!window.confirm("Delete this file?")) return;
-
-                        await fetch(
-                          `${BASE_URL}/api/resources/${file._id}`,
-                          {
-                            method: "DELETE",
-                            headers: {
-                              Authorization: `Bearer ${token}`
-                            }
-                          }
-                        );
-
-                        setFiles(files.filter((f) => f._id !== file._id));
-                      }}
-                      style={deleteButton}
-                    >
-                      Delete
-                    </button>
-                  )}
               </div>
             </div>
           ))}
@@ -331,7 +284,7 @@ export default function Resources() {
   );
 }
 
-/* ================= STYLES ================= */
+/* ---------------- STYLES ---------------- */
 
 const headerRow = {
   display: "flex",
@@ -377,15 +330,4 @@ const fileRow = {
   justifyContent: "space-between",
   padding: "12px 0",
   borderBottom: "1px solid #222"
-};
-
-const deleteButton = {
-  fontSize: "11px",
-  background: "#400",
-  color: "white",
-  border: "none",
-  padding: "4px 8px",
-  borderRadius: "6px",
-  marginTop: "6px",
-  cursor: "pointer"
 };
