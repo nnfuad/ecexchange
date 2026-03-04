@@ -71,6 +71,7 @@ export default function Home() {
             position: "relative",
             zIndex: 2,
             padding: "80px 60px",
+            width: "100%",
             maxWidth: "900px"
           }}
         >

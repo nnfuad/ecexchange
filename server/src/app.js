@@ -13,6 +13,6 @@ app.get("/", (req, res) => {
 app.use("/api/auth", require("./routes/authRoutes"));
 // app.use("/api/test", require("./routes/testRoutes"));
 app.use("/api/resources", require("./routes/resourceRoutes"));
-app.use("/uploads", express.static("uploads"));
+// app.use("/uploads", express.static("uploads")); // No need as we'd be using Cloudinary for storage now
 
 module.exports = app;

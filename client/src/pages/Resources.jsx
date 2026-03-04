@@ -145,7 +145,8 @@ export default function Resources() {
             {globalResults.map((file) => (
               <div key={file._id} style={fileRow}>
                 <a
-                  href={`${BASE_URL}${file.filePath}`}
+                  // href={`${BASE_URL}${file.filePath}`}
+                  href={file.fileUrl} // For Cloudinary URL
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -255,7 +256,8 @@ export default function Resources() {
           filteredFiles.map((file) => (
             <div key={file._id} style={fileRow}>
               <a
-                href={`${BASE_URL}${file.filePath}`}
+                // href={`${BASE_URL}${file.filePath}`} //For local storage
+                href={file.fileUrl} // For Cloudinary URL
                 target="_blank"
                 rel="noopener noreferrer"
               >

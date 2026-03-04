@@ -33,7 +33,7 @@ export default function UploadModal({ onClose }) {
       }
 
       const formData = new FormData();
-      formData.append("semester", semester);
+      formData.append("semesterId", semester);
       formData.append("courseCode", course);
       formData.append("file", file);
 

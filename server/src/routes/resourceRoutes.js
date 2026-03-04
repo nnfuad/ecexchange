@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
+// const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
@@ -18,67 +18,95 @@ const upload = multer({
 /* ===============================
    UPLOAD ROUTE
 =============================== */
+// Original upload route using local storage
+// router.post(
+//   "/upload",
+//   auth,
+//   upload.single("file"),
+//   async (req, res) => {
+//     try {
+//       const { semester, courseCode } = req.body;
+//       console.log("BODY:", req.body);
+//       console.log("FILE:", req.file); 
+//       if (!semester || !courseCode || !req.file) {
+//         return res.status(400).json({
+//           message: "Missing required fields"
+//         });
+//       }
 
-router.post(
-  "/upload",
-  auth,
-  upload.single("file"),
-  async (req, res) => {
-    try {
-      const { semester, courseCode } = req.body;
-      console.log("BODY:", req.body);
-      console.log("FILE:", req.file); 
-      if (!semester || !courseCode || !req.file) {
-        return res.status(400).json({
-          message: "Missing required fields"
-        });
-      }
+//       const safeCourse = courseCode.replace(/\s/g, "-");
 
-      const safeCourse = courseCode.replace(/\s/g, "-");
+//       const finalDir = path.join(
+//         __dirname,
+//         "../../uploads",
+//         semester,
+//         safeCourse
+//       );
 
-      const finalDir = path.join(
-        __dirname,
-        "../../uploads",
-        semester,
-        safeCourse
-      );
+//       fs.mkdirSync(finalDir, { recursive: true });
 
-      fs.mkdirSync(finalDir, { recursive: true });
+//       const finalPath = path.join(
+//         finalDir,
+//         req.file.filename + path.extname(req.file.originalname)
+//       );
 
-      const finalPath = path.join(
-        finalDir,
-        req.file.filename + path.extname(req.file.originalname)
-      );
+//       fs.renameSync(req.file.path, finalPath);
 
-      fs.renameSync(req.file.path, finalPath);
+//       const filePath =
+//         "/uploads/" +
+//         semester +
+//         "/" +
+//         safeCourse +
+//         "/" +
+//         path.basename(finalPath);
 
-      const filePath =
-        "/uploads/" +
-        semester +
-        "/" +
-        safeCourse +
-        "/" +
-        path.basename(finalPath);
+//       const resource = await Resource.create({
+//         semester,
+//         courseCode,
+//         originalName: req.file.originalname,
+//         filename: path.basename(finalPath),
+//         filePath,
+//         fileType: req.file.mimetype,
+//         uploadedBy: req.user.id
+//       });
 
-      const resource = await Resource.create({
-        semester,
-        courseCode,
-        originalName: req.file.originalname,
-        filename: path.basename(finalPath),
-        filePath,
-        fileType: req.file.mimetype,
-        uploadedBy: req.user.id
-      });
+//       res.json(resource);
+//     } catch (err) {
+//       console.error("Upload error:", err);
+//       res.status(500).json({
+//         message: "Upload failed"
+//       });
+//     }
+//   }
+// );
 
-      res.json(resource);
-    } catch (err) {
-      console.error("Upload error:", err);
-      res.status(500).json({
-        message: "Upload failed"
-      });
+// Uploading with Cloudinary
+const upload = require("../config/upload");
+router.post("/upload", auth, upload.single("file"), async (req, res) => {
+  try {
+    const { semesterId, courseCode } = req.body;
+    console.log("FILE OBJECT:", req.file);
+
+    if (!semesterId || !courseCode || !req.file) {
+      console.log("FILE OBJECT:", req.file);
+      return res.status(400).json({ message: "Missing required fields" });
     }
+
+    const resource = await Resource.create({
+      semester: semesterId,
+      courseCode,
+      originalName: req.file.originalname,
+      fileType: req.file.mimetype,
+      fileUrl: req.file.path, // Cloudinary URL
+      uploadedBy: req.user.id
+    });
+    console.log("Saved URL:", resource.fileUrl);
+    res.json(resource);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Upload failed" });
   }
-);
+});
 
 /* ===============================
    GET FILES
