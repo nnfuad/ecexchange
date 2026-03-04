@@ -1,7 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 
-// CORS configuration for development and production
+const app = express();   // <-- THIS WAS MISSING
+
+
+//   CORS
 app.use(
   cors({
     origin: [
@@ -12,18 +15,16 @@ app.use(
   })
 );
 
-
-
-
+//Middleware to parse JSON bodies
 app.use(express.json());
 
+
+//routes
 app.get("/", (req, res) => {
   res.send("API is running");
 });
 
 app.use("/api/auth", require("./routes/authRoutes"));
-// app.use("/api/test", require("./routes/testRoutes"));
 app.use("/api/resources", require("./routes/resourceRoutes"));
-// app.use("/uploads", express.static("uploads")); // No need as we'd be using Cloudinary for storage now
 
 module.exports = app;
