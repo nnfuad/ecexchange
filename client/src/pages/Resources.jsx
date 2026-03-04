@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { syllabus } from "../data/syllabus";
 import UploadModal from "../components/UploadModal";
 
-const BASE_URL = "https://ecexchange-api.onrender.com/";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function Resources() {
   const { semesterId, courseCode } = useParams();
