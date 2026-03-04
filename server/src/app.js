@@ -1,5 +1,4 @@
 const express = require("express");
-const cors = require("cors");
 
 
 // CORS configuration for development and production
