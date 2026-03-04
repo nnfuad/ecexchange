@@ -1,9 +1,21 @@
 const express = require("express");
 const cors = require("cors");
 
-const app = express();
 
-app.use(cors());
+// CORS configuration for development and production
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://ecexchange.vercel.app"
+    ],
+    credentials: true
+  })
+);
+
+const cors = require("cors");
+
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
