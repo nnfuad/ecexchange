@@ -4,6 +4,7 @@ import { syllabus } from "../data/syllabus";
 import UploadModal from "../components/UploadModal";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
+console.log("API URL:", BASE_URL);
 
 export default function Resources() {
   const { semesterId, courseCode } = useParams();
