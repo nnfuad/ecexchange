@@ -11,9 +11,9 @@ const auth = require("../middleware/auth");
    TEMP STORAGE (NO BODY ACCESS HERE)
 =============================== */
 
-const upload = multer({
-  dest: path.join(__dirname, "../../uploads/tmp")
-});
+// const upload = multer({
+//   dest: path.join(__dirname, "../../uploads/tmp")
+// });
 
 /* ===============================
    UPLOAD ROUTE
@@ -170,27 +170,22 @@ router.get("/", async (req, res) => {
 router.delete("/:id", auth, async (req, res) => {
   try {
     const file = await Resource.findById(req.params.id);
+    console.log("Delete request for file ID:", req.params.id, "by user:", req.user.id);
 
     if (!file)
+      console.log("File not found for deletion, ID:", req.params.id);
       return res.status(404).json({ message: "Not found" });
 
     if (file.uploadedBy.toString() !== req.user.id)
+      console.log("Unauthorized delete attempt by user:", req.user.id, "for file:", file._id);
       return res.status(403).json({ message: "Not allowed" });
-
-    const absolutePath = path.join(
-      __dirname,
-      "../../",
-      file.filePath
-    );
-
-    if (fs.existsSync(absolutePath)) {
-      fs.unlinkSync(absolutePath);
-    }
 
     await file.deleteOne();
 
     res.json({ message: "Deleted" });
-  } catch {
+  } catch (err) {
+    console.error(err);
+    console.error("Delete error:", err);
     res.status(500).json({ message: "Delete failed" });
   }
 });
