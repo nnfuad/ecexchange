@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { syllabus } from "../data/syllabus";
 import UploadModal from "../components/UploadModal";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
-console.log("API URL:", BASE_URL);
+const BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5050";
 
 export default function Resources() {
   const { semesterId, courseCode } = useParams();
@@ -16,14 +16,13 @@ export default function Resources() {
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  // GLOBAL SEARCH STATES
   const [globalSearch, setGlobalSearch] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterSemester, setFilterSemester] = useState("");
   const [globalResults, setGlobalResults] = useState([]);
 
   /* ===============================
-     SAFE TOKEN DECODE
+     TOKEN DECODE
   =============================== */
   let currentUserId = null;
 
@@ -39,23 +38,28 @@ export default function Resources() {
   /* ===============================
      DERIVE SEMESTER + COURSE
   =============================== */
+
   const semester = semesterId ? syllabus[semesterId] : null;
   const decodedCode = courseCode ? courseCode.replace(/-/g, " ") : null;
   const course = semester?.courses?.find((c) => c.code === decodedCode);
 
   /* ===============================
-     FETCH FILES (COURSE VIEW)
+     FETCH FILES
   =============================== */
+
   useEffect(() => {
     if (!semesterId || !courseCode) return;
 
     const fetchFiles = async () => {
       try {
         setLoading(true);
+
         const res = await fetch(
           `${BASE_URL}/api/resources/${semesterId}/${courseCode}`
         );
+
         const data = await res.json();
+
         setFiles(Array.isArray(data) ? data : []);
       } catch {
         setFiles([]);
@@ -68,8 +72,9 @@ export default function Resources() {
   }, [semesterId, courseCode]);
 
   /* ===============================
-     GLOBAL SEARCH FUNCTION
+     GLOBAL SEARCH
   =============================== */
+
   const handleGlobalSearch = async () => {
     try {
       const query = new URLSearchParams({
@@ -79,7 +84,9 @@ export default function Resources() {
       }).toString();
 
       const res = await fetch(`${BASE_URL}/api/resources?${query}`);
+
       const data = await res.json();
+
       setGlobalResults(Array.isArray(data) ? data : []);
     } catch {
       setGlobalResults([]);
@@ -87,13 +94,25 @@ export default function Resources() {
   };
 
   /* ===============================
-     SEMESTER LIST VIEW
+     FILE LINK HELPER
   =============================== */
+
+  const getFileLink = (file) => {
+    if (file.fileUrl) return file.fileUrl;
+    if (file.filePath) return `${BASE_URL}${file.filePath}`;
+    return "#";
+  };
+
+  /* ===============================
+     SEMESTER VIEW
+  =============================== */
+
   if (!semesterId) {
     return (
       <div style={{ padding: "40px 20px" }}>
         <div style={headerRow}>
           <h1>Resources</h1>
+
           {token && (
             <button onClick={() => setShowUpload(true)}>
               Upload Resource
@@ -101,7 +120,8 @@ export default function Resources() {
           )}
         </div>
 
-        {/* GLOBAL SEARCH SECTION */}
+        {/* SEARCH */}
+
         <div style={{ marginTop: "30px" }}>
           <input
             placeholder="Search resources..."
@@ -117,6 +137,7 @@ export default function Resources() {
               style={selectStyle}
             >
               <option value="">All Semesters</option>
+
               {Object.entries(syllabus).map(([key, val]) => (
                 <option key={key} value={key}>
                   {val.title}
@@ -140,19 +161,20 @@ export default function Resources() {
           </div>
         </div>
 
-        {/* GLOBAL SEARCH RESULTS */}
+        {/* SEARCH RESULTS */}
+
         {globalResults.length > 0 && (
           <div className="card" style={{ marginTop: "30px" }}>
             {globalResults.map((file) => (
               <div key={file._id} style={fileRow}>
                 <a
-                  // href={`${BASE_URL}${file.filePath}`}
-                  href={file.fileUrl} // For Cloudinary URL
+                  href={getFileLink(file)}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   {file.originalName}
                 </a>
+
                 <div style={{ fontSize: "12px", color: "#888" }}>
                   {file.semester} • {file.courseCode}
                 </div>
@@ -161,14 +183,11 @@ export default function Resources() {
           </div>
         )}
 
-        {/* SEMESTER GRID */}
+        {/* SEMESTERS */}
+
         <div style={semesterGrid}>
           {Object.entries(syllabus).map(([key, value]) => (
-            <Link
-              key={key}
-              to={`/resources/${key}`}
-              className="card"
-            >
+            <Link key={key} to={`/resources/${key}`} className="card">
               {value.title}
             </Link>
           ))}
@@ -184,17 +203,20 @@ export default function Resources() {
   if (!semester) return <p style={{ padding: "40px" }}>Invalid semester</p>;
 
   /* ===============================
-     COURSE LIST VIEW
+     COURSE LIST
   =============================== */
+
   if (!courseCode) {
     return (
       <div style={{ padding: "40px 20px" }}>
         <Link to="/resources">← Back</Link>
+
         <h1 style={{ marginTop: "20px" }}>{semester.title}</h1>
 
         <div style={courseGrid}>
           {semester.courses.map((c) => {
             const safeCode = c.code.replace(" ", "-");
+
             return (
               <Link
                 key={c.code}
@@ -221,6 +243,7 @@ export default function Resources() {
   /* ===============================
      FILE VIEW
   =============================== */
+
   return (
     <div style={{ padding: "40px 20px" }}>
       <Link to={`/resources/${semesterId}`}>← Back</Link>
@@ -257,8 +280,7 @@ export default function Resources() {
           filteredFiles.map((file) => (
             <div key={file._id} style={fileRow}>
               <a
-                // href={`${BASE_URL}${file.filePath}`} //For local storage
-                href={file.fileUrl} // For Cloudinary URL
+                href={getFileLink(file)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -266,9 +288,7 @@ export default function Resources() {
               </a>
 
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: "12px" }}>
-                  {file.fileType}
-                </div>
+                <div style={{ fontSize: "12px" }}>{file.fileType}</div>
 
                 {file.uploadedBy?.name && (
                   <div style={{ fontSize: "11px", color: "#888" }}>
