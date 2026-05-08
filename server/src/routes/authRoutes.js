@@ -2,7 +2,8 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const transporter = require("../config/mailer");
+// const transporter = require("../config/mailer");
+const resend = require("../config/mailer");
 
 const router = express.Router();
 
@@ -38,12 +39,117 @@ router.post("/signup-request", async (req, res) => {
       { upsert: true, new: true }
     );
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Signup Verification OTP",
-      text: `Your OTP is: ${otp}`
-    });
+    await resend.emails.send({
+  from: "ECExchange <onboarding@resend.dev>",
+  to: email,
+  subject: "Verify Your ECExchange Account",
+  html: `
+  <div style="
+    background:#0f172a;
+    padding:40px 20px;
+    font-family:Arial,sans-serif;
+    color:white;
+  ">
+    <div style="
+      max-width:600px;
+      margin:auto;
+      background:#111827;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid #1f2937;
+      box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    ">
+
+      <!-- HEADER -->
+      <div style="
+        background:linear-gradient(135deg,#2563eb,#7c3aed);
+        padding:35px;
+        text-align:center;
+      ">
+        <h1 style="
+          margin:0;
+          font-size:32px;
+          color:white;
+          letter-spacing:1px;
+        ">
+          📚 ECExchange
+        </h1>
+
+        <p style="
+          margin-top:10px;
+          color:#dbeafe;
+          font-size:15px;
+        ">
+          University Resource Sharing Platform
+        </p>
+      </div>
+
+      <!-- BODY -->
+      <div style="padding:40px 35px;">
+
+        <h2 style="
+          margin-top:0;
+          color:#f9fafb;
+          font-size:26px;
+        ">
+          Verify Your Email
+        </h2>
+
+        <p style="
+          color:#d1d5db;
+          font-size:16px;
+          line-height:1.7;
+        ">
+          Welcome to ECExchange.
+          Use the verification code below to complete your signup.
+        </p>
+
+        <!-- OTP BOX -->
+        <div style="
+          margin:35px 0;
+          text-align:center;
+        ">
+          <div style="
+            display:inline-block;
+            background:#1e293b;
+            border:2px dashed #3b82f6;
+            padding:22px 40px;
+            border-radius:16px;
+            letter-spacing:8px;
+            font-size:38px;
+            font-weight:bold;
+            color:#60a5fa;
+          ">
+            ${otp}
+          </div>
+        </div>
+
+        <p style="
+          color:#9ca3af;
+          font-size:14px;
+          line-height:1.6;
+        ">
+          This OTP will expire shortly for security reasons.
+          If you did not request this email, you may safely ignore it.
+        </p>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div style="
+        border-top:1px solid #1f2937;
+        padding:20px;
+        text-align:center;
+        color:#6b7280;
+        font-size:12px;
+      ">
+        © ${new Date().getFullYear()} ECExchange • Built for students
+      </div>
+
+    </div>
+  </div>
+  `
+      });
 
     res.json({ message: "OTP sent to email" });
 
