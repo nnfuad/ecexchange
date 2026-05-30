@@ -10,16 +10,35 @@
   box-sizing: border-box;
 }
 
-body {
+html,
+body,
+#root {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+body {
   font-family: "Segoe UI", Roboto, sans-serif;
   background-color: var(--bg-dark);
   color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 a {
   color: var(--text-main);
   text-decoration: none;
+  transition: color 0.2s ease;
+  overflow-wrap: anywhere;
 }
 
 a:hover {
@@ -34,8 +53,44 @@ button {
   color: black;
   cursor: pointer;
   font-weight: 600;
+  min-height: 44px;
+  transition: opacity 0.2s ease, transform 0.15s ease;
 }
 
 button:hover {
   opacity: 0.9;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* ===============================
+   MOBILE RESPONSIVE FIXES
+   =============================== */
+
+@media (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+
+  button {
+    width: 100%;
+  }
 }

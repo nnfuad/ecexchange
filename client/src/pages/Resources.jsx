@@ -96,7 +96,14 @@ export default function Resources() {
 
   if (!semesterId) {
     return (
-      <div style={{ padding: "40px 20px" }}>
+      <div
+        style={{
+          padding: "30px 16px",
+          maxWidth: "1200px",
+          margin: "0 auto",
+          boxSizing: "border-box"
+        }}
+      >
         <div style={headerRow}>
           <h1>Resources</h1>
 
@@ -115,7 +122,14 @@ export default function Resources() {
             style={searchInput}
           />
 
-          <div style={{ marginTop: "10px" }}>
+          <div
+            style={{
+              marginTop: "10px",
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "10px"
+            }}
+          >
             <select
               value={filterSemester}
               onChange={(e) => setFilterSemester(e.target.value)}
@@ -154,6 +168,14 @@ export default function Resources() {
                   href={getFileURL(file)}
                   target="_blank"
                   rel="noopener noreferrer"
+                  style={{
+                    color: "#4da6ff",
+                    textDecoration: "none",
+                    wordBreak: "break-word",
+                    flex: 1,
+                    minWidth: "220px",
+                    lineHeight: "1.6"
+                  }}
                 >
                   {file.originalName}
                 </a>
@@ -187,7 +209,14 @@ export default function Resources() {
 
   if (!courseCode) {
     return (
-      <div style={{ padding: "40px 20px" }}>
+      <div
+        style={{
+          padding: "30px 16px",
+          maxWidth: "1200px",
+          margin: "0 auto",
+          boxSizing: "border-box"
+        }}
+      >
         <Link to="/resources">← Back</Link>
 
         <h1 style={{ marginTop: "20px" }}>{semester.title}</h1>
@@ -222,7 +251,14 @@ export default function Resources() {
   /* ---------------- FILE VIEW ---------------- */
 
   return (
-    <div style={{ padding: "40px 20px" }}>
+    <div
+      style={{
+        padding: "30px 16px",
+        maxWidth: "1200px",
+        margin: "0 auto",
+        boxSizing: "border-box"
+      }}
+    >
       <Link to={`/resources/${semesterId}`}>← Back</Link>
 
       <h1 style={{ marginTop: "20px" }}>
@@ -260,11 +296,25 @@ export default function Resources() {
                 href={getFileURL(file)}
                 target="_blank"
                 rel="noopener noreferrer"
+                style={{
+                  color: "#4da6ff",
+                  textDecoration: "none",
+                  wordBreak: "break-word",
+                  flex: 1,
+                  minWidth: "220px",
+                  lineHeight: "1.6"
+                }}
               >
                 {file.originalName}
               </a>
 
-              <div style={{ textAlign: "right" }}>
+              <div
+                style={{
+                  textAlign: "right",
+                  minWidth: "120px",
+                  width: "100%"
+                }}
+              >
                 <div style={{ fontSize: "12px" }}>{file.fileType}</div>
 
                 {file.uploadedBy?.name && (
@@ -289,45 +339,57 @@ export default function Resources() {
 const headerRow = {
   display: "flex",
   justifyContent: "space-between",
-  alignItems: "center"
+  alignItems: "center",
+  gap: "14px",
+  flexWrap: "wrap"
 };
 
 const semesterGrid = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-  gap: "30px",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+  gap: "20px",
   marginTop: "40px"
 };
 
 const courseGrid = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-  gap: "20px",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: "16px",
   marginTop: "30px"
 };
 
 const searchInput = {
   marginTop: "20px",
-  padding: "10px",
+  padding: "12px",
   width: "100%",
   borderRadius: "8px",
   border: "1px solid #333",
   background: "#111",
-  color: "white"
+  color: "white",
+  boxSizing: "border-box",
+  fontSize: "16px"
 };
 
 const selectStyle = {
   padding: "10px",
   marginRight: "10px",
+  marginBottom: "10px",
   background: "#111",
   border: "1px solid #333",
   borderRadius: "6px",
-  color: "white"
+  color: "white",
+  width: "100%",
+  maxWidth: "260px",
+  boxSizing: "border-box"
 };
 
 const fileRow = {
   display: "flex",
   justifyContent: "space-between",
-  padding: "12px 0",
-  borderBottom: "1px solid #222"
+  alignItems: "flex-start",
+  gap: "14px",
+  padding: "14px 0",
+  borderBottom: "1px solid #222",
+  flexWrap: "wrap",
+  overflowWrap: "anywhere"
 };

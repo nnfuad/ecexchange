@@ -43,6 +43,8 @@ body {
   height: 100%;
   background-color: var(--bg-main);
   color: var(--text-primary);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Root container */
@@ -52,6 +54,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--bg-main);
+  overflow-x: hidden;
 }
 
 /* ===============================
@@ -65,21 +68,23 @@ h1, h2, h3, h4 {
 }
 
 h1 {
-  font-size: 3.2rem;
+  font-size: clamp(2rem, 7vw, 3.2rem);
 }
 
 h2 {
-  font-size: 2.2rem;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
 }
 
 h3 {
-  font-size: 1.4rem;
+  font-size: clamp(1.1rem, 4vw, 1.4rem);
 }
 
 p {
   margin: 0;
   line-height: 1.6;
   color: var(--text-secondary);
+  font-size: clamp(0.95rem, 3.5vw, 1rem);
+  overflow-wrap: break-word;
 }
 
 /* ===============================
@@ -104,12 +109,13 @@ button {
   background-color: var(--accent);
   color: #000;
   border: none;
-  padding: 12px 22px;
+  padding: 12px 18px;
   border-radius: 999px; /* pill */
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
   transition: transform 0.15s ease, background-color 0.15s ease;
+  min-height: 44px;
 }
 
 button:hover {
@@ -138,7 +144,7 @@ button.secondary:hover {
 .card {
   background-color: var(--bg-elevated);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: clamp(16px, 4vw, 24px);
   box-shadow: var(--shadow-soft);
   transition: transform 0.2s ease;
 }
@@ -150,7 +156,7 @@ button.secondary:hover {
 /* ===============================
    Auth.jsx
    =============================== */
-  input {
+input {
   width: 100%;
   padding: 12px;
   margin-bottom: 14px;
@@ -159,6 +165,8 @@ button.secondary:hover {
   border-radius: 8px;
   color: white;
   outline: none;
+  font-size: 16px;
+  box-sizing: border-box;
 }
 
 input::placeholder {
@@ -190,4 +198,21 @@ input:focus {
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: #3a3a3a;
+}
+/* ===============================
+   MOBILE RESPONSIVE FIXES
+   =============================== */
+
+@media (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  .card {
+    border-radius: 14px;
+  }
 }
