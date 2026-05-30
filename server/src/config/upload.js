@@ -38,6 +38,7 @@ const cloudinary = require("./cloudinary");
 
 const storage = new CloudinaryStorage({
   cloudinary,
+
   params: async (req, file) => {
     const { semesterId, courseCode } = req.body;
 
@@ -45,32 +46,54 @@ const storage = new CloudinaryStorage({
       throw new Error("Missing semester or courseCode");
     }
 
+    const cleanName = file.originalname
+      .replace(/\.[^/.]+$/, "") // remove extension
+      .replace(/\s+/g, "-")
+      .replace(/[()]/g, "");
+
     return {
       folder: `ecexchange/${semesterId}/${courseCode.replace(/\s+/g, "-")}`,
-      resource_type: "auto", // allows pdf, docx, ppt, zip, etc.
-      public_id:
-        Date.now() + "-" + file.originalname.replace(/\s+/g, "-")
+
+      // VERY IMPORTANT
+      // Forces ALL files to be downloadable resources
+      resource_type: "raw",
+
+      public_id: `${Date.now()}-${cleanName}`,
+
+      use_filename: true,
+      unique_filename: false
     };
   }
 });
 
 const upload = multer({
   storage,
+
   limits: {
     fileSize: 25 * 1024 * 1024 // 25MB
   },
+
   fileFilter: (req, file, cb) => {
     const allowed = [
       "application/pdf",
+
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+
       "application/vnd.ms-powerpoint",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
       "application/zip",
       "application/x-zip-compressed",
+
       "image/png",
       "image/jpeg",
-      "image/jpg"
+      "image/jpg",
+
+      "text/plain"
     ];
 
     if (!allowed.includes(file.mimetype)) {
