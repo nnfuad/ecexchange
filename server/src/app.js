@@ -17,6 +17,7 @@ app.use(
 
 //Middleware to parse JSON bodies
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 
 //routes
@@ -26,5 +27,20 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/resources", require("./routes/resourceRoutes"));
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("GLOBAL ERROR FULL:", {
+    message: err.message,
+    stack: err.stack,
+    name: err.name,
+    code: err.code,
+    raw: err
+  });
+
+  res.status(500).json({
+    message: err.message || "Internal server error"
+  });
+});
 
 module.exports = app;
