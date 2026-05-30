@@ -48,15 +48,29 @@ export default function UploadModal({ onClose }) {
         }
       );
 
+      const text = await res.text();
+
+      console.log("UPLOAD RESPONSE:", text);
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(
+          "Server returned invalid response. Check Render logs."
+        );
+      }
+
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Upload failed");
+        throw new Error(data.message || "Upload failed");
       }
 
       alert("File uploaded successfully");
       onClose();
     } catch (err) {
-      alert(err.message);
+      console.error("UPLOAD FRONTEND ERROR:", err);
+      alert(err.message || "Upload failed");
     }
   };
 
