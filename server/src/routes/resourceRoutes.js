@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
 // const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
 
 const Resource = require("../models/Resource");
 const auth = require("../middleware/auth");
@@ -85,10 +83,11 @@ const upload = require("../config/upload");
 router.post("/upload", auth, upload.single("file"), async (req, res) => {
   try {
     const { semesterId, courseCode } = req.body;
-    console.log("FILE OBJECT:", req.file);
+    console.log("UPLOAD BODY:", req.body);
+    console.log("UPLOAD FILE:", req.file);
 
     if (!semesterId || !courseCode || !req.file) {
-      console.log("FILE OBJECT:", req.file);
+      console.log("UPLOAD FILE:", req.file);
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -103,7 +102,7 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
     console.log("Saved URL:", resource.fileUrl);
     res.json(resource);
   } catch (err) {
-    console.error(err);
+    console.error("UPLOAD ERROR:", err);
     res.status(500).json({ message: "Upload failed" });
   }
 });
@@ -172,20 +171,26 @@ router.delete("/:id", auth, async (req, res) => {
     const file = await Resource.findById(req.params.id);
     console.log("Delete request for file ID:", req.params.id, "by user:", req.user.id);
 
-    if (!file)
+    if (!file) {
       console.log("File not found for deletion, ID:", req.params.id);
       return res.status(404).json({ message: "Not found" });
+    }
 
-    if (file.uploadedBy.toString() !== req.user.id)
-      console.log("Unauthorized delete attempt by user:", req.user.id, "for file:", file._id);
+    if (file.uploadedBy.toString() !== req.user.id) {
+      console.log(
+        "Unauthorized delete attempt by user:",
+        req.user.id,
+        "for file:",
+        file._id
+      );
       return res.status(403).json({ message: "Not allowed" });
+    }
 
     await file.deleteOne();
 
     res.json({ message: "Deleted" });
   } catch (err) {
-    console.error(err);
-    console.error("Delete error:", err);
+    console.error("DELETE ERROR:", err);
     res.status(500).json({ message: "Delete failed" });
   }
 });

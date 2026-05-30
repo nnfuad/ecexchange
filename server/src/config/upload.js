@@ -46,7 +46,7 @@ const storage = new CloudinaryStorage({
     }
 
     return {
-      folder: `ecexchange/${semesterId}/${courseCode.replace(" ", "-")}`,
+      folder: `ecexchange/${semesterId}/${courseCode.replace(/\s+/g, "-")}`,
       resource_type: "raw", // allows pdf, docx, ppt, zip, etc.
       public_id:
         Date.now() + "-" + file.originalname.replace(/\s+/g, "-")
@@ -54,6 +54,31 @@ const storage = new CloudinaryStorage({
   }
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 25 * 1024 * 1024 // 25MB
+  },
+  fileFilter: (req, file, cb) => {
+    const allowed = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/zip",
+      "application/x-zip-compressed",
+      "image/png",
+      "image/jpeg",
+      "image/jpg"
+    ];
+
+    if (!allowed.includes(file.mimetype)) {
+      return cb(new Error("Unsupported file type"));
+    }
+
+    cb(null, true);
+  }
+});
 
 module.exports = upload;
