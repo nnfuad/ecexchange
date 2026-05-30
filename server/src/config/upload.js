@@ -47,7 +47,7 @@ const storage = new CloudinaryStorage({
 
     return {
       folder: `ecexchange/${semesterId}/${courseCode.replace(/\s+/g, "-")}`,
-      resource_type: "raw", // allows pdf, docx, ppt, zip, etc.
+      resource_type: "auto", // allows pdf, docx, ppt, zip, etc.
       public_id:
         Date.now() + "-" + file.originalname.replace(/\s+/g, "-")
     };
