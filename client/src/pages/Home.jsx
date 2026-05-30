@@ -43,7 +43,8 @@ export default function Home() {
         style={{
           position: "relative",
           minHeight: "calc(100vh - 140px)",
-          overflow: "hidden"
+          overflow: "hidden",
+          paddingTop: "20px"
         }}
       >
         {/* BACKGROUND SLIDES */}
@@ -70,25 +71,40 @@ export default function Home() {
           style={{
             position: "relative",
             zIndex: 2,
-            padding: "80px 60px",
+            padding: "80px 20px",
             width: "100%",
-            maxWidth: "900px"
+            maxWidth: "900px",
+            margin: "0 auto",
+            boxSizing: "border-box"
           }}
         >
           {firstName && (
-            <h2 style={{ color: "#1DB954", marginBottom: "12px" }}>
+            <h2
+              style={{
+                color: "#1DB954",
+                marginBottom: "12px",
+                fontSize: "clamp(1rem, 4vw, 1.5rem)",
+                lineHeight: "1.5"
+              }}
+            >
               Hello {firstName}, welcome to ECE’s resource sharing world
             </h2>
           )}
 
-          <h1 style={{ fontSize: "3.5rem", lineHeight: "1.2" }}>
+          <h1
+            style={{
+              fontSize: "clamp(2.2rem, 8vw, 3.5rem)",
+              lineHeight: "1.2",
+              wordBreak: "break-word"
+            }}
+          >
             Study smarter. <br /> Learn together.
           </h1>
 
           <p
             style={{
               color: "#b3b3b3",
-              fontSize: "1.2rem",
+              fontSize: "clamp(1rem, 3.5vw, 1.2rem)",
               marginTop: "22px",
               maxWidth: "700px"
             }}
@@ -102,18 +118,23 @@ export default function Home() {
       <section
         style={{
           background: "#121212",
-          padding: "90px 60px"
+          padding: "70px 20px"
         }}
       >
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "2.4rem", marginBottom: "36px" }}>
+          <h2
+            style={{
+              fontSize: "clamp(1.8rem, 6vw, 2.4rem)",
+              marginBottom: "36px"
+            }}
+          >
             Why this platform?
           </h2>
 
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
               gap: "32px"
             }}
           >
@@ -149,18 +170,23 @@ export default function Home() {
       <section
         style={{
           background: "#181818",
-          padding: "90px 60px"
+          padding: "70px 20px"
         }}
       >
         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "2.4rem", marginBottom: "36px" }}>
+          <h2
+            style={{
+              fontSize: "clamp(1.8rem, 6vw, 2.4rem)",
+              marginBottom: "36px"
+            }}
+          >
             How it works
           </h2>
 
           <ol
             style={{
               color: "#b3b3b3",
-              fontSize: "1.1rem",
+              fontSize: "clamp(1rem, 3.5vw, 1.1rem)",
               lineHeight: "1.9",
               paddingLeft: "20px"
             }}
@@ -178,18 +204,23 @@ export default function Home() {
       <section
         style={{
           background: "#121212",
-          padding: "90px 60px",
+          padding: "70px 20px",
           textAlign: "center"
         }}
       >
         <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "2.6rem", marginBottom: "20px" }}>
+          <h2
+            style={{
+              fontSize: "clamp(2rem, 7vw, 2.6rem)",
+              marginBottom: "20px"
+            }}
+          >
             Built for focused learners
           </h2>
 
           <p
             style={{
-              fontSize: "1.1rem",
+              fontSize: "clamp(1rem, 3.5vw, 1.1rem)",
               marginBottom: "28px"
             }}
           >
@@ -197,7 +228,13 @@ export default function Home() {
             to help you learn better and faster.
           </p>
 
-          <p style={{ color: "#1DB954", fontSize: "1.1rem" }}>
+          <p
+            style={{
+              color: "#1DB954",
+              fontSize: "clamp(1rem, 3.5vw, 1.1rem)",
+              lineHeight: "1.6"
+            }}
+          >
             Learn • Share • Grow
           </p>
         </div>
