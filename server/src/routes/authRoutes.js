@@ -2,8 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-// const transporter = require("../config/mailer");
-const resend = require("../config/mailer");
+const transporter = require("../config/mailer");
 
 const router = express.Router();
 
@@ -39,8 +38,8 @@ router.post("/signup-request", async (req, res) => {
       { upsert: true, new: true }
     );
 
-    await resend.emails.send({
-  from: "ECExchange <onboarding@resend.dev>",
+    await transporter.sendMail({
+  from: process.env.EMAIL_USER,
   to: email,
   subject: "Verify Your ECExchange Account",
   html: `
@@ -60,7 +59,6 @@ router.post("/signup-request", async (req, res) => {
       box-shadow:0 10px 30px rgba(0,0,0,0.4);
     ">
 
-      <!-- HEADER -->
       <div style="
         background:linear-gradient(135deg,#2563eb,#7c3aed);
         padding:35px;
@@ -84,7 +82,6 @@ router.post("/signup-request", async (req, res) => {
         </p>
       </div>
 
-      <!-- BODY -->
       <div style="padding:40px 35px;">
 
         <h2 style="
@@ -104,7 +101,6 @@ router.post("/signup-request", async (req, res) => {
           Use the verification code below to complete your signup.
         </p>
 
-        <!-- OTP BOX -->
         <div style="
           margin:35px 0;
           text-align:center;
@@ -135,7 +131,6 @@ router.post("/signup-request", async (req, res) => {
 
       </div>
 
-      <!-- FOOTER -->
       <div style="
         border-top:1px solid #1f2937;
         padding:20px;
@@ -149,7 +144,7 @@ router.post("/signup-request", async (req, res) => {
     </div>
   </div>
   `
-      });
+});
 
     res.json({ message: "OTP sent to email" });
 
