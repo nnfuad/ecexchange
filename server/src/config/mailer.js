@@ -1,31 +1,13 @@
-const nodemailer = require("nodemailer");
-const dns = require("dns");
+const SibApiV3Sdk = require("sib-api-v3-sdk");
 
-dns.setDefaultResultOrder("ipv4first");
+const client = SibApiV3Sdk.ApiClient.instance;
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: false
-  },
-  family: 4
-});
+const apiKey = client.authentications["api-key"];
+apiKey.apiKey = process.env.BREVO_API_KEY;
 
-transporter.verify((err) => {
-  if (err) {
-    console.log("SMTP ERROR:", err);
-  } else {
-    console.log("SMTP READY");
-  }
-});
+const tranEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
 
-module.exports = transporter;
+module.exports = tranEmailApi;
 // const { Resend } = require("resend");
 
 // const resend = new Resend(process.env.RESEND_API_KEY);
