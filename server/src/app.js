@@ -27,6 +27,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/resources", require("./routes/resourceRoutes"));
+app.use("/api/chat", require("./routes/chatRoutes"));
 
 // Global error handler
 app.use((err, req, res, next) => {
