@@ -117,7 +117,9 @@ export default function Chatbot() {
         {
           role: "assistant",
           text:
-            "Error: " + err.message
+
+            "Error: " + err.message +"\n"+
+            "Maybe try logging back in..."
         }
       ]);
     } finally {
