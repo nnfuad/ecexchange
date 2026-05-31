@@ -42,11 +42,10 @@ export default function Navbar() {
     >
       <div
         style={{
-          display: "flex",
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
           alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: "16px"
+          width: "100%"
         }}
       >
         {/* LOGO */}
@@ -54,8 +53,11 @@ export default function Navbar() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "8px",
-            minWidth: 0
+            justifyContent: "center",
+            gap: "6px",
+            minWidth: 0,
+            width: "100%",
+            gridColumn: 2
           }}
         >
           <Link to="/">
@@ -63,8 +65,9 @@ export default function Navbar() {
               src="/logo.gif"
               alt="logo"
               style={{
-                width: "130px",
-                maxWidth: "40vw",
+                width: "96px",
+                maxWidth: "28vw",
+                minWidth: "68px",
                 height: "auto",
                 display: "block"
               }}
@@ -74,11 +77,12 @@ export default function Navbar() {
           <span
             style={{
               color: "#b3b3b3",
-              fontSize: "11px",
+              fontSize: "9px",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              maxWidth: "120px"
+              maxWidth: "14vw",
+              opacity: 0.75
             }}
           >
             Learn • Share • Grow
@@ -95,9 +99,11 @@ export default function Navbar() {
             color: "#1DB954",
             textShadow: "0 0 12px rgba(29,185,84,0.9)",
             borderRadius: "8px",
-            padding: "8px 10px",
+            padding: "7px 9px",
             cursor: "pointer",
-            fontSize: "18px"
+            fontSize: "16px",
+            justifySelf: "end",
+            gridColumn: 3
           }}
         >
           ☰
