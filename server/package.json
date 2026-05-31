@@ -19,6 +19,7 @@
     "multer": "^2.1.0",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^8.0.1",
+    "openai": "^6.39.1",
     "resend": "^6.12.3",
     "sib-api-v3-sdk": "^8.5.0"
   }

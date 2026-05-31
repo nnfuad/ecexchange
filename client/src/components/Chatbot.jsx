@@ -73,7 +73,22 @@ export default function Chatbot() {
         }
       );
 
-      const data = await res.json();
+      const rawText = await res.text();
+
+      console.log(
+        "RAW AI RESPONSE:",
+        rawText
+      );
+
+      let data;
+
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        throw new Error(
+          "Server returned invalid JSON"
+        );
+      }
 
       if (!res.ok) {
         throw new Error(
@@ -86,10 +101,17 @@ export default function Chatbot() {
         ...prev,
         {
           role: "assistant",
-          text: data.reply
+          text:
+            data.reply ||
+            "No response from AI"
         }
       ]);
     } catch (err) {
+      console.error(
+        "CHATBOT FRONTEND ERROR:",
+        err
+      );
+
       setMessages((prev) => [
         ...prev,
         {
