@@ -152,6 +152,11 @@ npm run dev
 * `DELETE /api/resources/:id`
 
 ---
+### Chatbot
+A simple chatbot was implemented to help student discuss any academic problems/brainstorm any ideas.<br>
+Chatbot only opens on logging in(to limit api calls)<br>
+Each chat sessions are stored in a MongoDB Vector Database.<br>
+So the bot remembers you even after you log out.
 
 ## 📸 Demo
 
@@ -168,7 +173,7 @@ Try:
 
 ##  Known Limitations
 
-* Email OTP may fail on some deployments (SMTP restrictions)
+* No Knowledge of User to chatbot, unless told explicitly in the chats sessions.
 * No file preview for certain formats (e.g., DOCX)
 * No pagination yet for large datasets
 
@@ -176,7 +181,7 @@ Try:
 
 ##  Future Improvements
 
-*  Chatbot assistant
+*  Chatbot(IMPLEMENTED)
 *  Analytics dashboard
 *  Upvote / rating system
 *  Download tracking
@@ -186,8 +191,8 @@ Try:
 
 ##  Author
 
-**Nur Nafis Fuad**
-Electrical & Computer Engineering
+**Nur Nafis Fuad**<br>
+Electrical & Computer Engineering<br>
 ML & Full Stack Enthusiast
 
 ---
